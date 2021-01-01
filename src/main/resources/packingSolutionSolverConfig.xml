@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<solver xmlns="https://www.optaplanner.org/xsd/solver" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://www.optaplanner.org/xsd/solver https://www.optaplanner.org/xsd/solver/solver.xsd">
+
+    <solutionClass>org.example.domain.PackingSolution</solutionClass>
+    <entityClass>org.example.domain.Item</entityClass>
+    <scoreDirectorFactory>
+        <scoreDrl>packingSolutionScoreRules.drl</scoreDrl>
+    </scoreDirectorFactory>
+
+    <constructionHeuristic>
+        <constructionHeuristicType>FIRST_FIT_DECREASING</constructionHeuristicType>
+    </constructionHeuristic>
+    <localSearch>
+        <unionMoveSelector>
+            <changeMoveSelector />
+            <moveListFactory>
+                <moveListFactoryClass>org.example.solver.move.factory.CoordinateChangeMoveFactory</moveListFactoryClass>
+            </moveListFactory>
+            <moveListFactory>
+                <moveListFactoryClass>org.example.solver.move.factory.RotateItemMoveFactory</moveListFactoryClass>
+            </moveListFactory>
+            <moveListFactory>
+                <moveListFactoryClass>org.example.solver.move.factory.ReverseItemMoveFactory</moveListFactoryClass>
+            </moveListFactory>
+            <moveListFactory>
+                <moveListFactoryClass>org.example.solver.move.factory.ContainerChangeMoveFactory</moveListFactoryClass>
+            </moveListFactory>
+        </unionMoveSelector>
+    </localSearch>
+
+</solver>

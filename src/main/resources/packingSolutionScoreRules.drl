@@ -1,0 +1,91 @@
+import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScoreHolder;
+
+import org.example.domain.PackingSolution;
+import org.example.domain.Item;
+import org.example.domain.Container;
+
+global HardSoftScoreHolder scoreHolder;
+
+//*****************
+// Hard Constraints
+//*****************
+
+rule "itemOverlap"
+    when
+        $i1 : Item($id : id)
+        $i2 : Item(intersects($i1) == true, id > $id)
+
+    then
+        if($i2.intersectArea($i1) < 1) {
+            scoreHolder.addHardConstraintMatch(kcontext, -1);
+        } else {
+            scoreHolder.addHardConstraintMatch(kcontext, -$i2.intersectArea($i1));
+        }
+end
+
+rule "outOfContainerBoundsWidth"
+    when
+        $item : Item(widthOverlapsContainer() == true, $id : id)
+    then
+        if($item.widthOverlap() < 1) {
+            scoreHolder.addHardConstraintMatch(kcontext, -1);
+        } else {
+            scoreHolder.addHardConstraintMatch(kcontext, -$item.widthOverlap());
+        }
+end
+
+rule "outOfContainerBoundsLength"
+    when
+        $item : Item(lengthOverlapsContainer() == true, $id : id)
+
+    then
+        if($item.lengthOverlap() < 1) {
+                scoreHolder.addHardConstraintMatch(kcontext, -1);
+            } else {
+                scoreHolder.addHardConstraintMatch(kcontext, -$item.lengthOverlap());
+            }
+end
+
+rule "outOfContainerBoundsHeight"
+    when
+        $item : Item(heightOverlapsContainer() == true, $id : id)
+
+    then
+        if($item.heightOverlap() < 1) {
+                scoreHolder.addHardConstraintMatch(kcontext, -1);
+            } else {
+                scoreHolder.addHardConstraintMatch(kcontext, -$item.heightOverlap());
+            }
+end
+
+rule "containerOverweight"
+    when
+        $container : Container($containerId : id)
+        Number($totalWeight: intValue()) from accumulate (Item(container == $container, $weight: weight), sum($weight))
+
+    then
+        if($container.getWeightMax() - $totalWeight <= 0)
+            scoreHolder.addHardConstraintMatch(kcontext, (int)($container.getWeightMax() - $totalWeight));
+end
+
+//*****************
+// Soft Constraints
+//*****************
+
+rule "leftoverSpace"
+    when
+        $container : Container($containerId : id)
+        Number($totalVolume: intValue()) from accumulate (Item(container == $container, $volume: volume), sum($volume))
+
+    then
+        scoreHolder.addSoftConstraintMatch(kcontext, -(int)($container.getVolume() - $totalVolume ));
+end
+
+rule "containerCost"
+    when
+        $container : Container($cost : cost)
+        exists Item(container == $container)
+
+    then
+        scoreHolder.addSoftConstraintMatch(kcontext, -$cost);
+end
