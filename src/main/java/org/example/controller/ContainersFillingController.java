@@ -16,7 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 @RestController
-@RequestMapping("/myTower/containersFilling")
+//@RequestMapping("/myTower/containersFilling")
 public class ContainersFillingController {
     @Autowired
     private SolverManager<PackingSolution, UUID> solverManager;
